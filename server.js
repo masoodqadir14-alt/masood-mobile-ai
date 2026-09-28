@@ -247,10 +247,25 @@ app.post("/api/chat", async function(req, res) {
             });
 
         const result =
-            await chat.sendMessage(message);
+    await chat.sendMessage(message);
 
-        const reply =
-            result.response.text();
+const reply =
+    result.response.text();
+
+if (
+    message.toLowerCase().includes("remember") ||
+    message.toLowerCase().includes("save this") ||
+    message.toLowerCase().includes("store this")
+) {
+    const memory = readMemory();
+
+    memory.permanent.push({
+        text: message,
+        savedAt: new Date().toISOString()
+    });
+
+    saveMemory(memory);
+}
 
         res.json({
             reply: reply
