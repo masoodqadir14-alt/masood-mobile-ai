@@ -1,0 +1,25 @@
+GENERAL EDUCATION COURSES
+
+Arts & Humanities | GEN-5001 | 2(2-0)
+Natural Sciences | GEN-5002 | 3(2-1)
+Social Sciences | GEN-5003 | 2(2-0)
+Functional English | GEN-5004 | 3(3-0)
+Expository Writing | GEN-5005 | 3(3-0)
+Quantitative Reasoning-I | GEN-5006 | 3(3-0)
+Quantitative Reasoning-II | GEN-5007 | 3(3-0)
+Islamic Studies / Religious Education / Ethics for non-Muslim students | GEN-5008 / GEN-5021 | 2(2-0)
+Ideology & Constitution of Pakistan | GEN-5009 | 2(2-0)
+Applications of Information and Communication Technologies (ICT) | GEN-5010 | 3(2-1)
+Entrepreneurship | GEN-5011 | 2(2-0)
+Civics and Community Engagement | GEN-5012 | 2(2-0)
+Pakistan Studies | GEN-5013 | 2(2-0)
+Fehm-e-Quran-I / Corresponding Course for non-Muslim students | GEN-5014 / GEN-5022 | 1(0-1)
+Fehm-e-Quran-II / Corresponding Course for non-Muslim students | GEN-5015 / GEN-5023 | 1(0-1)
+Introduction to Artificial Intelligence | GEN-5016 | 3(2-1)
+
+Other official academic/admin details:
+Internship/Field Experience: XXX-60008
+Capstone Project: XXX-60009
+MSc Thesis: XXX-7000
+PhD Thesis: XXX-8000
+Deputy Director Academics, Faculty of Agricultural Sciences email: ddacad.foas@gudgk.edu.pk

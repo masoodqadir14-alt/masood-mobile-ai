@@ -1,0 +1,14 @@
+{
+  "name": "masood-mobile-ai",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "latest",
+    "express": "latest",
+    "openai": "latest"
+  }
+}
