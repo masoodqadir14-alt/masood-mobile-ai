@@ -39,4 +39,10 @@ async function send() {
   }
 }
 form.addEventListener('submit', e => { e.preventDefault(); send(); });
-fetch('/api/status').then(r=>r.json()).then(x=>{status.title = x.online ? 'Online' : 'Offline';}).catch(()=>{status.style.color='#ef4444';});
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service worker registered'))
+      .catch(error => console.error('Service worker registration failed:', error));
+  });
+}
