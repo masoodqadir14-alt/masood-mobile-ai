@@ -1,4 +1,5 @@
 import express from "express";
+import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs";
@@ -6,6 +7,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,30 +41,49 @@ function readText(name) {
     }
 }
 
-function readMemory() {
-    try {
-        return JSON.parse(
-            fs.readFileSync(
-                path.join(dataDir, "memory.json"),
-                "utf8"
-            )
-        );
-    } catch {
-        return {
-            permanent: [],
-            daily: []
-        };
+async function readMemory() {
+    const { data, error } = await supabase
+        .from("memories")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        throw error;
+    }
+
+    return {
+        permanent: data
+            .filter(item => item.type === "permanent")
+            .map(item => ({
+                text: item.content,
+                savedAt: item.created_at
+            })),
+
+        daily: data
+            .filter(item => item.type === "daily")
+            .map(item => ({
+                text: item.content,
+                savedAt: item.created_at
+            }))
+    };
+}
+
+async function saveMemoryItem(type, text) {
+    const { error } = await supabase
+        .from("memories")
+        .insert({
+            type: type,
+            content: text
+        });
+
+    if (error) {
+        throw error;
     }
 }
 
-function saveMemory(memory) {
-    fs.writeFileSync(
-        path.join(dataDir, "memory.json"),
-        JSON.stringify(memory, null, 2)
-    );
-}
+async function buildInstructions() {
+    const memory = await readMemory();
 
-function buildInstructions() {
     return (
         "You are Dr. Masood Qadir's personal AI assistant.\n\n" +
 
@@ -71,7 +96,7 @@ function buildInstructions() {
         "\n\n" +
 
         "SAVED MEMORY:\n" +
-        JSON.stringify(readMemory(), null, 2) +
+        JSON.stringify(memory, null, 2) +
         "\n\n" +
 
         "RULES:\n" +
@@ -92,7 +117,6 @@ function buildInstructions() {
         "15. Do not make official or important decisions on Dr. Masood's behalf."
     );
 }
-
 app.use(express.json({ limit: "1mb" }));
 
 app.use(
@@ -108,85 +132,78 @@ app.get("/api/status", function(req, res) {
     });
 });
 
-app.get("/api/memory", function(req, res) {
-    res.json(readMemory());
-});
+app.get("/api/memory", async function(req, res) {
+    try {
+        const memory = await readMemory();
 
-app.post("/api/memory", function(req, res) {
+        res.json(memory);
+    } catch (error) {
+        console.error("Memory error:");
+        console.error(error);
 
-    const type = req.body?.type;
-    const information = req.body?.information;
-
-    if (
-        !["permanent", "daily"].includes(type) ||
-        !information ||
-        !information.trim()
-    ) {
-        return res.status(400).json({
-            error: "type and information are required"
+        res.status(500).json({
+            error: "Could not read memory."
         });
     }
-
-    const memory = readMemory();
-
-    memory[type].push({
-        date: new Date().toISOString(),
-        information: information.trim()
-    });
-
-    saveMemory(memory);
-
-    res.json({
-        ok: true,
-        memory: memory
-    });
 });
 
-app.delete("/api/memory", function(req, res) {
+app.delete("/api/memory", async function(req, res) {
 
-    const q = String(
-        req.body?.information || ""
-    ).trim().toLowerCase();
+    try {
 
-    if (!q) {
-        return res.status(400).json({
-            error: "information is required"
-        });
-    }
+        const q = String(
+            req.body?.information || ""
+        ).trim().toLowerCase();
 
-    const memory = readMemory();
+        if (!q) {
+            return res.status(400).json({
+                error: "information is required"
+            });
+        }
 
-    const before =
-        memory.permanent.length +
-        memory.daily.length;
+        const { data, error } = await supabase
+            .from("memories")
+            .select("*");
 
-    memory.permanent =
-        memory.permanent.filter(function(item) {
-            return !item.information
+        if (error) {
+            throw error;
+        }
+
+        const matches = data.filter(function(item) {
+            return item.content
                 .toLowerCase()
                 .includes(q);
         });
 
-    memory.daily =
-        memory.daily.filter(function(item) {
-            return !item.information
-                .toLowerCase()
-                .includes(q);
+        for (const item of matches) {
+            const { error: deleteError } = await supabase
+                .from("memories")
+                .delete()
+                .eq("id", item.id);
+
+            if (deleteError) {
+                throw deleteError;
+            }
+        }
+
+        const memory = await readMemory();
+
+        res.json({
+            ok: true,
+            removed: matches.length,
+            memory: memory
         });
 
-    saveMemory(memory);
+    } catch (error) {
 
-    const after =
-        memory.permanent.length +
-        memory.daily.length;
+        console.error("Memory delete error:");
+        console.error(error);
 
-    res.json({
-        ok: true,
-        removed: before - after,
-        memory: memory
-    });
+        res.status(500).json({
+            error: "Could not delete memory."
+        });
+    }
 });
-
 app.post("/api/chat", async function(req, res) {
 
     try {
@@ -218,7 +235,7 @@ app.post("/api/chat", async function(req, res) {
             genAI.getGenerativeModel({
                 model: MODEL,
                 systemInstruction:
-                    buildInstructions()
+                    await buildInstructions()
             });
 
         const chatHistory = history
@@ -257,14 +274,10 @@ if (
     message.toLowerCase().includes("save this") ||
     message.toLowerCase().includes("store this")
 ) {
-    const memory = readMemory();
-
-    memory.permanent.push({
-        text: message,
-        savedAt: new Date().toISOString()
-    });
-
-    saveMemory(memory);
+    await saveMemoryItem(
+        "permanent",
+        message
+    );
 }
 
         res.json({
