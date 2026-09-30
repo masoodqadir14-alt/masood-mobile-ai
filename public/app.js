@@ -56,7 +56,7 @@ async function send() {
   typing.classList.add('typing');
 
   try {
-    const r = await fetch('/api/chat', {
+   const r = await fetch('https://masood-mobile-ai.vercel.app/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -101,7 +101,7 @@ form.addEventListener('submit', function(e) {
   send();
 });
 
-fetch('/api/status')
+fetch('https://masood-mobile-ai.vercel.app/api/status')
   .then(r => r.json())
   .then(x => {
     status.title = x.online ? 'Online' : 'Offline';
