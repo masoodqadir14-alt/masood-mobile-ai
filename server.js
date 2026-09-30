@@ -149,7 +149,7 @@ async function buildInstructions() {
 "18. When asked what you remember, use the saved memory data provided to you and summarize it clearly.\n" +
 "19. Do not confuse temporary conversation history with permanent saved memory.\n" +
 "20. For important personal or academic information, rely on stored information rather than guessing course codes." +
-"21. Never say that information was saved, noted in records, or added to memory unless the user explicitly asked you to remember, save, store, or note it and the save operation was actually performed."
+"21. Never claim that you saved, noted, stored, recorded, or added information to memory unless the user explicitly requested memory saving and the application actually saved it. A normal statement such as 'My favorite color is blue' must NOT be described as saved or noted. Instead, say that you understand the information but it has not been saved to permanent memory."
     );
 }
 app.use(express.json({ limit: "1mb" }));
