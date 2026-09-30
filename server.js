@@ -350,10 +350,9 @@ const isForgetRequest =
 
 if (isForgetRequest) {
     const searchText = message
-        .replace(/^forget\s+/i, "")
-        .replace(/^remove\s+/i, "")
-        .replace(/^delete\s+/i, "")
-        .trim();
+    .replace(/^(forget|remove|delete)\s+/i, "")
+    .replace(/^that\s+/i, "")
+    .trim();
 
     if (searchText) {
         await deleteMemoryItem(searchText);
