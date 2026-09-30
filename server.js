@@ -320,11 +320,17 @@ for (let attempt = 1; attempt <= 3; attempt++) {
 const reply =
     result.response.text();
 
-if (
-    message.toLowerCase().includes("remember") ||
-    message.toLowerCase().includes("save this") ||
-    message.toLowerCase().includes("store this")
-) {
+const lowerMessage = message.toLowerCase();
+
+const isSaveRequest =
+    lowerMessage.startsWith("remember that ") ||
+    lowerMessage.startsWith("remember ") ||
+    lowerMessage.startsWith("save this") ||
+    lowerMessage.startsWith("store this") ||
+    lowerMessage.startsWith("note that ") ||
+    lowerMessage.startsWith("note ");
+
+if (isSaveRequest) {
     await saveMemoryItem(
         "permanent",
         message
