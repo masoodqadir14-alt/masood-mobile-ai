@@ -81,6 +81,35 @@ async function saveMemoryItem(type, text) {
     }
 }
 
+async function deleteMemoryItem(searchText) {
+    const { data, error } = await supabase
+        .from("memories")
+        .select("*");
+
+    if (error) {
+        throw error;
+    }
+
+    const search = searchText.toLowerCase().trim();
+
+    const matches = data.filter(function(item) {
+        return item.content.toLowerCase().includes(search);
+    });
+
+    for (const item of matches) {
+        const { error: deleteError } = await supabase
+            .from("memories")
+            .delete()
+            .eq("id", item.id);
+
+        if (deleteError) {
+            throw deleteError;
+        }
+    }
+
+    return matches.length;
+}
+
 async function buildInstructions() {
     const memory = await readMemory();
 
@@ -267,8 +296,24 @@ app.post("/api/chat", async function(req, res) {
                 history: chatHistory
             });
 
-        const result =
-    await chat.sendMessage(message);
+        let result;
+
+for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+        result = await chat.sendMessage(message);
+        break;
+    } catch (error) {
+        console.error(`Gemini attempt ${attempt} failed:`, error);
+
+        if (attempt === 3) {
+            throw error;
+        }
+
+        await new Promise(resolve =>
+            setTimeout(resolve, 1500)
+        );
+    }
+}
 
 const reply =
     result.response.text();
