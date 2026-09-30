@@ -162,7 +162,15 @@ app.use(
         path.join(__dirname, "public")
     )
 );
+app.get("/api/test-knowledge", function(req, res) {
+    const knowledge = readText("knowledge_base.md", __dirname);
 
+    res.json({
+        found: knowledge.length > 0,
+        length: knowledge.length,
+        preview: knowledge.substring(0, 300)
+    });
+});
 app.get("/api/status", function(req, res) {
     res.json({
         online: true,
