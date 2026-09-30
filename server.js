@@ -274,24 +274,30 @@ app.post("/api/chat", async function(req, res) {
             });
 
         const chatHistory = history
-            .map(function(item) {
+    .map(function(item) {
+        return {
+            role:
+                item.role === "assistant"
+                    ? "model"
+                    : "user",
 
-                return {
-                    role:
-                        item.role === "assistant"
-                            ? "model"
-                            : "user",
+            parts: [
+                {
+                    text:
+                        String(
+                            item.content || ""
+                        )
+                }
+            ]
+        };
+    });
 
-                    parts: [
-                        {
-                            text:
-                                String(
-                                    item.content || ""
-                                )
-                        }
-                    ]
-                };
-            });
+while (
+    chatHistory.length > 0 &&
+    chatHistory[0].role !== "user"
+) {
+    chatHistory.shift();
+}
 
         const chat =
             model.startChat({
