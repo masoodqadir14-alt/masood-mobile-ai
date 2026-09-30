@@ -265,7 +265,30 @@ app.post("/api/chat", async function(req, res) {
                     "Gemini API key is not configured."
             });
         }
+const lowerMessage = message.toLowerCase();
 
+const isForgetRequest =
+    lowerMessage.startsWith("forget ") ||
+    lowerMessage.startsWith("remove ") ||
+    lowerMessage.startsWith("delete ");
+
+if (isForgetRequest) {
+    const searchText = message
+        .replace(/^(forget|remove|delete)\s+/i, "")
+        .replace(/^that\s+/i, "")
+        .trim();
+
+    if (searchText) {
+        const removed = await deleteMemoryItem(searchText);
+
+        return res.json({
+            reply:
+                removed > 0
+                    ? "Done. I have removed that information from my saved memory."
+                    : "I could not find that information in my saved memory."
+        });
+    }
+}
         const model =
             genAI.getGenerativeModel({
                 model: MODEL,
@@ -326,7 +349,6 @@ for (let attempt = 1; attempt <= 3; attempt++) {
 const reply =
     result.response.text();
 
-const lowerMessage = message.toLowerCase();
 
 const isSaveRequest =
     lowerMessage.startsWith("remember that ") ||
@@ -343,21 +365,6 @@ if (isSaveRequest) {
     );
 }
 
-const isForgetRequest =
-    lowerMessage.startsWith("forget ") ||
-    lowerMessage.startsWith("remove ") ||
-    lowerMessage.startsWith("delete ");
-
-if (isForgetRequest) {
-    const searchText = message
-    .replace(/^(forget|remove|delete)\s+/i, "")
-    .replace(/^that\s+/i, "")
-    .trim();
-
-    if (searchText) {
-        await deleteMemoryItem(searchText);
-    }
-}
 
         res.json({
             reply: reply
