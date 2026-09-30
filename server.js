@@ -148,7 +148,7 @@ async function buildInstructions() {
 "17. When the user asks to forget or remove a saved memory, do not save it; explain that the relevant saved memory needs to be removed.\n" +
 "18. When asked what you remember, use the saved memory data provided to you and summarize it clearly.\n" +
 "19. Do not confuse temporary conversation history with permanent saved memory.\n" +
-"20. For important personal or academic information, rely on stored information rather than guessing."
+"20. For important personal or academic information, rely on stored information rather than guessing course codes." +
 "21. Never say that information was saved, noted in records, or added to memory unless the user explicitly asked you to remember, save, store, or note it and the save operation was actually performed."
     );
 }
