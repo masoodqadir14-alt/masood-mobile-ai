@@ -31,10 +31,10 @@ const genAI = new GoogleGenerativeAI(
 
 const dataDir = path.join(__dirname, "data");
 
-function readText(name) {
+function readText(name, baseDir = dataDir) {
     try {
         return fs.readFileSync(
-            path.join(dataDir, name),
+            path.join(baseDir, name),
             "utf8"
         );
     } catch {
@@ -125,7 +125,7 @@ async function buildInstructions() {
         readText("academic_info.txt") +
         "\n\n" +
 "PROJECT KNOWLEDGE BASE:\n" +
-readText("../knowledge_base.md") +
+readText("knowledge_base.md", __dirname) +
 "\n\n" +
         "SAVED MEMORY:\n" +
         JSON.stringify(memory, null, 2) +
