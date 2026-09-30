@@ -124,7 +124,9 @@ async function buildInstructions() {
         "ACADEMIC INFORMATION:\n" +
         readText("academic_info.txt") +
         "\n\n" +
-
+"PROJECT KNOWLEDGE BASE:\n" +
+readText("../knowledge_base.md") +
+"\n\n" +
         "SAVED MEMORY:\n" +
         JSON.stringify(memory, null, 2) +
         "\n\n" +
