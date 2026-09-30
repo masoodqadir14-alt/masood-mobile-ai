@@ -337,6 +337,23 @@ if (isSaveRequest) {
     );
 }
 
+const isForgetRequest =
+    lowerMessage.startsWith("forget ") ||
+    lowerMessage.startsWith("remove ") ||
+    lowerMessage.startsWith("delete ");
+
+if (isForgetRequest) {
+    const searchText = message
+        .replace(/^forget\s+/i, "")
+        .replace(/^remove\s+/i, "")
+        .replace(/^delete\s+/i, "")
+        .trim();
+
+    if (searchText) {
+        await deleteMemoryItem(searchText);
+    }
+}
+
         res.json({
             reply: reply
         });
