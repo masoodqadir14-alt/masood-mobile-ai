@@ -207,13 +207,48 @@ app.delete("/api/memory", async function(req, res) {
             throw error;
         }
 
-        const matches = data.filter(function(item) {
-            return item.content
+        // Normalize common spelling differences
+        function normalize(text) {
+            return String(text || "")
                 .toLowerCase()
-                .includes(q);
+                .replace(/\bfavourit(e)?\b/g, "favorite")
+                .replace(/\bfavour\b/g, "favor")
+                .replace(/\bcolour\b/g, "color")
+                .replace(/\bcentre\b/g, "center")
+                .replace(/\borganisation\b/g, "organization")
+                .replace(/\bprogramme\b/g, "program")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        const normalizedQuery = normalize(q);
+
+        const matches = data.filter(function(item) {
+
+            const content = normalize(item.content);
+
+            // Direct match
+            if (content.includes(normalizedQuery)) {
+                return true;
+            }
+
+            // Word-based match
+            const queryWords = normalizedQuery
+                .split(/\s+/)
+                .filter(word => word.length > 2);
+
+            const matchedWords = queryWords.filter(word =>
+                content.includes(word)
+            );
+
+            return (
+                queryWords.length > 0 &&
+                matchedWords.length >= Math.ceil(queryWords.length * 0.7)
+            );
         });
 
         for (const item of matches) {
+
             const { error: deleteError } = await supabase
                 .from("memories")
                 .delete()
@@ -229,6 +264,10 @@ app.delete("/api/memory", async function(req, res) {
         res.json({
             ok: true,
             removed: matches.length,
+            message:
+                matches.length > 0
+                    ? `Memory updated. Removed ${matches.length} item(s).`
+                    : "I could not find a matching memory.",
             memory: memory
         });
 
